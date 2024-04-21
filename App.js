@@ -5,26 +5,16 @@ import { StatusBar } from 'expo-status-bar';
 import SignupScreen from './Signup';
 import LoginScreen from './Login';
 import HomeScreen from './Home';
-
+import MainContainer from "./navigation/MainContainer"
 const Stack = createStackNavigator();
 
-export default function App() {
 
 
+function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Signup">
-        <Stack.Screen name="Signup" component={SignupScreen} />
-        <Stack.Screen 
-          name="Login" 
-          children={(props) => <LoginScreen {...props}  />} 
-        />
-        <Stack.Screen 
-          name="Home" 
-          children={(props) => <HomeScreen {...props} />} 
-        />
-      </Stack.Navigator>
-      <StatusBar style="auto" />
-    </NavigationContainer>
+    token ? <MainContainer/> : <LoginScreen/>
   );
 }
+
+
+export default App
