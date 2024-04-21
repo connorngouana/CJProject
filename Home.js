@@ -1,161 +1,125 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, FlatList, Image, TextInput, Button } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image, TextInput, Button, TouchableOpacity } from 'react-native';
 
-export default function HomeScreen({ route, navigation}) {
+const HomeScreen = ({route}) => {
+  const [posts, setPosts] = useState([]);
+  const [description, setDescription] = useState('');
+  const [isLoading, setLoading] = useState(false);
   const { token, userId } = route.params;
 
-  const [posts, setPosts] = useState([]);
-  const [newPostDescription, setNewPostDescription] = useState('');
-  const [newPostPicturePath, setNewPostPicturePath] = useState('');
-
-  useEffect(() => {
-    fetchFeedPosts();
-  }, []);
-
-  const fetchFeedPosts = async () => {
+  // Function to fetch posts
+  const fetchPosts = async () => {
+    setLoading(true);
     try {
-      const response = await fetch('https://4180-84-203-11-66.ngrok-free.app/posts/', {
+      const response = await fetch('https://4180-84-203-11-66.ngrok-free.app/posts/',{
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
         },
-      });
+      }); // Your API endpoint to get posts
       const data = await response.json();
       setPosts(data);
     } catch (error) {
-      console.error('Failed to fetch feed posts:', error);
+      console.error('Failed to fetch posts:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleLikePost = async (postId) => {
+  // Function to handle post submission
+  const handlePost = async () => {
+    if (!description) {
+      alert('Please enter a description for your post.');
+      return;
+    }
     try {
-      const response = await fetch(`https://4180-84-203-11-66.ngrok-free.app/posts/like/${postId}`, {
+      const response = await fetch('https://4180-84-203-11-66.ngrok-free.app/posts', { // Your API endpoint to create a post
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          userId: userId,
-        }),
+        body: JSON.stringify({ userId, description }),
       });
-      const updatedPost = await response.json();
-      setPosts(posts.map(post => post._id === updatedPost._id ? updatedPost : post));
+      const result = await response.json();
+      console.log(result);
+      setDescription(''); // Clear the input after submission
+      fetchPosts(); // Reload posts after adding
     } catch (error) {
-      console.error('Failed to like post:', error);
+      console.error('Failed to submit post:', error);
     }
   };
 
-
-
-  const handleCreatePost = async () => {
-    try {
-      const response = await fetch('https://4180-84-203-11-66.ngrok-free.app/posts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          email, // Include userId here
-          description: newPostDescription,
-        }),
-      });
-      
-      const data = await response.json();
-      setPosts(data); // Refresh posts after creating a new one
-      console.log(data);
-      setNewPostDescription('');
-      setNewPostPicturePath('');
-      fetchFeedPosts();
-    } catch (error) {
-      console.error('Failed to create post:', error);
-    }
-  };
-  
-  const renderPostItem = ({ item }) => (
-    <View style={styles.postContainer}>
-      <Text style={styles.postTitle}>{item.firstName} {item.lastName}</Text>
-      <Image source={{ uri: item.picturePath }} style={styles.postImage} />
-      <Text style={styles.postDescription}>{item.description}</Text>
-      <Button title="Like" onPress={() => handleLikePost(item._id)} />
-    </View>
-  );
+  // Initial fetch of posts when the component mounts
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Home</Text>
-      <View style={styles.createPostContainer}>
+      <View style={styles.inputContainer}>
         <TextInput
-          style={styles.input}
-          placeholder="Enter post description"
-          value={newPostDescription}
-          onChangeText={text => setNewPostDescription(text)}
+          placeholder="What's on your mind?"
+          style={styles.textInput}
+          value={description}
+          onChangeText={setDescription}
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Enter picture URL (optional)"
-          value={newPostPicturePath}
-          onChangeText={text => setNewPostPicturePath(text)}
-        />
-        <Button title="Create Post" onPress={handleCreatePost} />
+        <Button title="Post" onPress={handlePost} />
       </View>
-      <FlatList
-        data={posts}
-        renderItem={renderPostItem}
-        keyExtractor={(item) => item._id}
-        style={styles.feed}
-      />
+      {isLoading ? (
+        <Text>Loading...</Text>
+      ) : (
+        <FlatList
+          data={posts}
+          keyExtractor={item => item._id}
+          renderItem={({ item }) => (
+            <View style={styles.postContainer}>
+              <Image style={styles.userAvatar} source={{ uri: item.userPicturePath }} />
+              <Text style={styles.postText}>{item.description}</Text>
+              <Image style={styles.postImage} source={{ uri: item.picturePath }} />
+              {/* You might want to add buttons for liking, commenting, etc. */}
+            </View>
+          )}
+        />
+      )}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: 20,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
+  inputContainer: {
+    padding: 10,
   },
-  createPostContainer: {
-    width: '80%',
-    marginBottom: 20,
-  },
-  input: {
+  textInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
     marginBottom: 10,
     padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
     borderRadius: 5,
   },
   postContainer: {
     marginBottom: 20,
     padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    width: '80%',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
-  postTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
+  userAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  postText: {
+    marginVertical: 10,
   },
   postImage: {
     width: '100%',
     height: 200,
-    marginBottom: 5,
-    resizeMode: 'cover',
-    borderRadius: 5,
-  },
-  postDescription: {
-    fontSize: 16,
-  },
-  feed: {
-    width: '80%',
   },
 });
+
+export default HomeScreen;
