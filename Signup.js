@@ -1,27 +1,39 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
-import axios from 'axios';
-
+import { useNavigation } from '@react-navigation/native';
 export default function SignupScreen({ navigation }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
+  const navigate = useNavigation();
   const handleSignup = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/auth/register', {
-        firstName,
-        lastName,
-        email,
-        password,
+      const response = await fetch('https://4180-84-203-11-66.ngrok-free.app/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          "ngrok-skip-browser-warning": "69420",
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          password,
+        }),
       });
-      console.log(response.data); // You can handle success accordingly
+      const data = await response.json();
+      console.log(data); // You can handle success accordingly
+      if (response.ok) {
+        navigation.navigate('Login');
+      } else {
+        console.error('Signup failed:', data.error);
+      }
     } catch (error) {
-      console.error(error); // You can handle errors accordingly
+      console.error('Signup failed:', error); // You can handle errors accordingly
     }
   };
-
+  
   return (
     <View style={styles.container}>
       <Text>Signup</Text>

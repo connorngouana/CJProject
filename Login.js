@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
-import axios from 'axios';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -8,13 +7,26 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/auth/login', {
-        email,
-        password,
+      const response = await fetch('https://4180-84-203-11-66.ngrok-free.app/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          "ngrok-skip-browser-warning": "69420",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       });
-      console.log(response.data); // You can handle success accordingly
+      const data = await response.json();
+      console.log(data); // You can handle success accordingly
+      navigation.navigate('Home', { token: data.token, userId: data.user._id }); // Pass userId along with token
     } catch (error) {
-      console.error(error.response.data); // You can handle errors accordingly
+      console.error('Login failed:', error.message); // Log the error message
+      if (error.response) {
+        console.error('Error response:', error.response.data); // Log the response data if available
+      }
+      // Handle other errors accordingly
     }
   };
 
