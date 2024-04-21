@@ -20,7 +20,7 @@ export default function LoginScreen({ navigation }) {
       });
       const data = await response.json();
       console.log(data); // You can handle success accordingly
-      navigation.navigate('Home', { token: data.token, userId: data.user._id }); // Pass userId along with token
+      navigation.navigate('Home', { token: data.token, userId: data.user._id, firstName: data.user.firstName , lastName: data.user.lastName }); // Pass userId along with token
     } catch (error) {
       console.error('Login failed:', error.message); // Log the error message
       if (error.response) {
