@@ -54,26 +54,6 @@ const HomeScreen = ({ route }) => {
     }
   };
 
-  const addRemoveFriend = async (friendId) => {
-    try {
-      const response = await fetch(`https://4180-84-203-11-66.ngrok-free.app/users/${userId}/${friendId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          id: userId,
-          friendId: friendId,
-        }),
-      });
-      const data = await response.json();
-      console.log(data);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
   const handleLike = async (postId) => {
     try {
       const response = await fetch(`https://4180-84-203-11-66.ngrok-free.app/posts/${postId}/like`, {
@@ -84,9 +64,17 @@ const HomeScreen = ({ route }) => {
         },
         body: JSON.stringify({ userId }),
       });
-      const data = await response.json();
-      console.log(data);
-      fetchPosts();
+      const updatedPost = await response.json();
+      const updatedPosts = posts.map((post) => {
+        if (post._id === postId) {
+          return {
+            ...post,
+            isLiked: !post.isLiked // Toggle the like status
+          };
+        }
+        return post;
+      });
+      setPosts(updatedPosts);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -95,7 +83,6 @@ const HomeScreen = ({ route }) => {
   useEffect(() => {
     fetchPosts();
   }, []);
-
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
@@ -126,16 +113,16 @@ const HomeScreen = ({ route }) => {
               <Image style={styles.postImage} source={{ uri: item.picturePath }} />
               <View style={styles.interactionContainer}>
               <TouchableOpacity onPress={() => handleLike(item._id)} style={styles.likeButton}>
-  <View style={styles.likeContainer}>
-    <Ionicons 
-      name={item.isLiked ? "heart" : "heart-outline"} 
-      size={24} 
-      color={item.isLiked ? "#ff0000" : "#007bff"} 
-    />
-    <Text style={styles.likesCount}>{item.likes.length}</Text>
-  </View>
-</TouchableOpacity>
-
+              <View style={styles.likeContainer}>
+                {item.isLiked ? (
+                  <Ionicons name="heart" size={24} color="#ff0000" />
+                ) : (
+                  <Ionicons name="heart-outline" size={24} color="#007bff" />
+                )}
+                <Text style={styles.likesCount}>{item.likes.length}</Text>
+              </View>
+            </TouchableOpacity>
+                <Text style={styles.likesCount}>{item.likes.length}</Text>
               </View>
               <TouchableOpacity onPress={() => addRemoveFriend(item.userId)} style={styles.addRemoveButton}>
                 <Ionicons name="person-add-outline" size={24} color="#007bff" />
@@ -205,12 +192,9 @@ const styles = StyleSheet.create({
   },
   likeButton: {
     marginRight: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   likesCount: {
     fontWeight: 'bold',
-    marginLeft: 5,
   },
   addRemoveButton: {
     position: 'absolute',
