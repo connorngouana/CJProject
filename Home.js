@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, Image, TextInput, Button, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons'; // Import Ionicons
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const HomeScreen = ({ route }) => {
   const [posts, setPosts] = useState([]);
   const [description, setDescription] = useState('');
   const [isLoading, setLoading] = useState(false);
-  const { token, userId, firstName, lastName } = route.params;
+  const { token, userId } = route.params;
 
-  // Function to fetch posts
   const fetchPosts = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://4180-84-203-11-66.ngrok-free.app/posts/',{
+      const response = await fetch('https://4180-84-203-11-66.ngrok-free.app/posts/', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -27,7 +26,6 @@ const HomeScreen = ({ route }) => {
     }
   };
 
-  // Function to handle post submission
   const handlePost = async () => {
     if (!description) {
       alert('Please enter a description for your post.');
@@ -40,7 +38,12 @@ const HomeScreen = ({ route }) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ userId, description }),
+        body: JSON.stringify({
+          userId,
+          description,
+          userPicturePath: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
+          picturePath: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
+        }),
       });
       const result = await response.json();
       console.log(result);
@@ -51,25 +54,44 @@ const HomeScreen = ({ route }) => {
     }
   };
 
-  // Function to add or remove friend
   const addRemoveFriend = async (friendId) => {
     try {
       const response = await fetch(`https://4180-84-203-11-66.ngrok-free.app/users/${userId}/${friendId}`, {
-        method: 'PATCH', // Using PATCH method to add or remove friend
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify({
+          id: userId,
+          friendId: friendId,
+        }),
       });
       const data = await response.json();
-      console.log(data); // Handle response as needed
-      // Update UI or state based on the response
+      console.log(data);
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
-  // Initial fetch of posts when the component mounts
+  const handleLike = async (postId) => {
+    try {
+      const response = await fetch(`https://4180-84-203-11-66.ngrok-free.app/posts/${postId}/like`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await response.json();
+      console.log(data);
+      fetchPosts();
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   useEffect(() => {
     fetchPosts();
   }, []);
@@ -96,13 +118,25 @@ const HomeScreen = ({ route }) => {
               <View style={styles.userInfo}>
                 <Image style={styles.userAvatar} source={{ uri: item.userPicturePath }} />
                 <View style={{ marginLeft: 10 }}>
-                  <Text style={styles.userName}>{`${firstName} ${lastName}`}</Text>
-                  <Text style={styles.postedBy}>Posted by {`${firstName} ${lastName}`}</Text>
+                  <Text style={styles.userName}>{`${item.firstName} ${item.lastName}`}</Text>
+                  <Text style={styles.postedBy}>Posted by {`${item.firstName} ${item.lastName}`}</Text>
                 </View>
               </View>
               <Text style={styles.postText}>{item.description}</Text>
               <Image style={styles.postImage} source={{ uri: item.picturePath }} />
-              {/* Friend Add/Remove Button */}
+              <View style={styles.interactionContainer}>
+              <TouchableOpacity onPress={() => handleLike(item._id)} style={styles.likeButton}>
+  <View style={styles.likeContainer}>
+    <Ionicons 
+      name={item.isLiked ? "heart" : "heart-outline"} 
+      size={24} 
+      color={item.isLiked ? "#ff0000" : "#007bff"} 
+    />
+    <Text style={styles.likesCount}>{item.likes.length}</Text>
+  </View>
+</TouchableOpacity>
+
+              </View>
               <TouchableOpacity onPress={() => addRemoveFriend(item.userId)} style={styles.addRemoveButton}>
                 <Ionicons name="person-add-outline" size={24} color="#007bff" />
               </TouchableOpacity>
@@ -118,6 +152,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 20,
+  },
+  likeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   inputContainer: {
     padding: 10,
@@ -159,6 +197,20 @@ const styles = StyleSheet.create({
   postImage: {
     width: '100%',
     height: 200,
+  },
+  interactionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  likeButton: {
+    marginRight: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  likesCount: {
+    fontWeight: 'bold',
+    marginLeft: 5,
   },
   addRemoveButton: {
     position: 'absolute',
