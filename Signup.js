@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { TextInput, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-export default function SignupScreen({ navigation }) {
+
+export default function SignupScreen() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigation();
+  const navigation = useNavigation();
+
   const handleSignup = async () => {
     try {
       const response = await fetch('https://4180-84-203-11-66.ngrok-free.app/auth/register', {
@@ -33,40 +36,41 @@ export default function SignupScreen({ navigation }) {
       console.error('Signup failed:', error); // You can handle errors accordingly
     }
   };
-  
+
   return (
     <View style={styles.container}>
       <Text>Signup</Text>
       <TextInput
         style={styles.input}
-        placeholder="First Name"
-        onChangeText={setFirstName}
+        label="First Name"
         value={firstName}
+        onChangeText={setFirstName}
       />
       <TextInput
         style={styles.input}
-        placeholder="Last Name"
-        onChangeText={setLastName}
+        label="Last Name"
         value={lastName}
+        onChangeText={setLastName}
       />
       <TextInput
         style={styles.input}
-        placeholder="Email"
-        onChangeText={setEmail}
+        label="Email"
         value={email}
+        onChangeText={setEmail}
       />
       <TextInput
         style={styles.input}
-        placeholder="Password"
-        onChangeText={setPassword}
+        label="Password"
         value={password}
+        onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Signup" onPress={handleSignup} />
-      <Button
-        title="Go to Login"
-        onPress={() => navigation.navigate('Login')}
-      />
+      <Button mode="contained" onPress={handleSignup}>
+        Signup
+      </Button>
+      <Button onPress={() => navigation.navigate('Login')}>
+        Go to Login
+      </Button>
     </View>
   );
 }
@@ -76,11 +80,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 20,
   },
   input: {
-    width: '80%',
+    width: '100%',
     marginBottom: 10,
-    borderWidth: 1,
-    padding: 10,
   },
 });

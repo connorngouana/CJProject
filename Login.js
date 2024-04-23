@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { TextInput, Button } from 'react-native-paper';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -35,22 +36,23 @@ export default function LoginScreen({ navigation }) {
       <Text>Login</Text>
       <TextInput
         style={styles.input}
-        placeholder="Email"
-        onChangeText={setEmail}
+        label="Email"
         value={email}
+        onChangeText={setEmail}
       />
       <TextInput
         style={styles.input}
-        placeholder="Password"
-        onChangeText={setPassword}
+        label="Password"
         value={password}
+        onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Login" onPress={handleLogin} />
-      <Button
-        title="Go to Signup"
-        onPress={() => navigation.navigate('Signup')}
-      />
+      <Button mode="contained" onPress={handleLogin}>
+        Login
+      </Button>
+      <Button onPress={() => navigation.navigate('Signup')}>
+        Go to Signup
+      </Button>
     </View>
   );
 }
@@ -60,11 +62,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 20,
   },
   input: {
-    width: '80%',
+    width: '100%',
     marginBottom: 10,
-    borderWidth: 1,
-    padding: 10,
   },
 });
