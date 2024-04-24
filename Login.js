@@ -20,14 +20,14 @@ export default function LoginScreen({ navigation }) {
         }),
       });
       const data = await response.json();
-      console.log(data); // You can handle success accordingly
-      navigation.navigate('Home', { token: data.token, userId: data.user._id, firstName: data.user.firstName , lastName: data.user.lastName }); // Pass userId along with token
+      console.log(data); 
+      navigation.navigate('Home', { token: data.token, userId: data.user._id, firstName: data.user.firstName , lastName: data.user.lastName }); 
     } catch (error) {
-      console.error('Login failed:', error.message); // Log the error message
+      console.error('Login failed:', error.message); 
       if (error.response) {
-        console.error('Error response:', error.response.data); // Log the response data if available
+        console.error('Error response:', error.response.data); 
       }
-      // Handle other errors accordingly
+     
     }
   };
 

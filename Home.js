@@ -4,14 +4,14 @@ import { Card, Avatar, Button, IconButton } from 'react-native-paper';
 import * as ImagePicker from "expo-image-picker";
 
 
-const HomeScreen = ({ route }) => {
+const HomeScreen = ({ route}) => {
   const [posts, setPosts] = useState([]);
   const [description, setDescription] = useState('');
   const [commentText, setCommentText] = useState('');
-const [picture, setPicture] = useState([]);
+  const [picture, setPicture] = useState([]);
   const [isLoading, setLoading] = useState(false);
   const [friendStatus, setFriendStatus] = useState({});
-  const { token, userId } = route.params;
+  const { token, userId, picturePath } = route.params;
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -46,19 +46,20 @@ const [picture, setPicture] = useState([]);
         body: JSON.stringify({
           userId,
           description,
-          userPicturePath: picture,
+          userPicturePath: picturePath,
           picturePath: picture,
         }),
       });
       const result = await response.json();
-      console.log(result);
+      console.log(picturePath);
       setDescription('');
       fetchPosts();
     } catch (error) {
       console.error('Failed to submit post:', error);
     }
   };
-
+  
+  
   const handleLike = async (postId) => {
     try {
       const response = await fetch(`https://4180-84-203-11-66.ngrok-free.app/posts/${postId}/like`, {
@@ -74,8 +75,8 @@ const [picture, setPicture] = useState([]);
         if (post._id === postId) {
           return {
             ...post,
-            isLiked: !post.isLiked, // Toggle the like status
-            likes: updatedPost.likes, // Update the likes count
+            isLiked: !post.isLiked, 
+            likes: updatedPost.likes, 
           };
         }
         return post;
@@ -108,13 +109,13 @@ const [picture, setPicture] = useState([]);
         if (post._id === postId) {
           return {
             ...post,
-            comments: updatedPost.comments, // Update the comments array
+            comments: updatedPost.comments, 
           };
         }
         return post;
       });
       setPosts(updatedPosts);
-      setCommentText(''); // Clear the comment input after submission
+      setCommentText(''); 
     } catch (error) {
       console.error('Error:', error);
     }
@@ -132,7 +133,6 @@ const [picture, setPicture] = useState([]);
       const formattedFriends = await response.json();
       console.log('Formatted Friends:', formattedFriends);
       
-      // Update the friend status based on the response
       setFriendStatus({ ...friendStatus, [friendId]: !friendStatus[friendId] });
     } catch (error) {
       console.error('Error adding/removing friend:', error);

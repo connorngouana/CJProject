@@ -9,11 +9,11 @@ export default function SignupScreen() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [picture, setPicture] = useState([]);
+  const [userpicture, setUserPicture] = useState([]);
   const navigation = useNavigation();
 
 
-  const handleImage = async () => {
+  const handleUserImage = async () => {
     let selected = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
@@ -23,7 +23,7 @@ export default function SignupScreen() {
     console.log(selected);
  
     if (!selected.canceled) {
-      setPicture(selected.assets[0].uri);
+      setUserPicture(selected.assets[0].uri);
     }
   };
 
@@ -40,10 +40,11 @@ export default function SignupScreen() {
           lastName,
           email,
           password,
-          picturePath: picture,
+          picturePath: userpicture,
         }),
       });
       const data = await response.json();
+      navigation.navigate('Home', { picturePath: data.picturePath }); // Pass picturePath along with other parameters
       console.log(data); // You can handle success accordingly
       if (response.ok) {
         navigation.navigate('Login');
@@ -85,7 +86,7 @@ export default function SignupScreen() {
       />
       <Button
         mode="contained"
-        onPress={handleImage}
+        onPress={handleUserImage}
         style={styles.imageButton}
       >
         Select Image
