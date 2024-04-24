@@ -2,13 +2,30 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import * as ImagePicker from "expo-image-picker";
 
 export default function SignupScreen() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [picture, setPicture] = useState([]);
   const navigation = useNavigation();
+
+
+  const handleImage = async () => {
+    let selected = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    console.log(selected);
+ 
+    if (!selected.canceled) {
+      setPicture(selected.assets[0].uri);
+    }
+  };
 
   const handleSignup = async () => {
     try {
@@ -23,6 +40,7 @@ export default function SignupScreen() {
           lastName,
           email,
           password,
+          picturePath: picture,
         }),
       });
       const data = await response.json();
@@ -65,6 +83,13 @@ export default function SignupScreen() {
         onChangeText={setPassword}
         secureTextEntry
       />
+      <Button
+        mode="contained"
+        onPress={handleImage}
+        style={styles.imageButton}
+      >
+        Select Image
+      </Button>
       <Button mode="contained" onPress={handleSignup}>
         Signup
       </Button>
@@ -85,5 +110,9 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     marginBottom: 10,
+  },
+  imageButton: {
+    marginTop: 10,
+    backgroundColor: '#007AFF', // Change to your desired color
   },
 });

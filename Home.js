@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, Image, TextInput, TouchableOpacity } from 'react-native';
 import { Card, Avatar, Button, IconButton } from 'react-native-paper';
+import * as ImagePicker from "expo-image-picker";
+
 
 const HomeScreen = ({ route }) => {
   const [posts, setPosts] = useState([]);
   const [description, setDescription] = useState('');
   const [commentText, setCommentText] = useState('');
+const [picture, setPicture] = useState([]);
   const [isLoading, setLoading] = useState(false);
   const [friendStatus, setFriendStatus] = useState({});
   const { token, userId } = route.params;
@@ -43,8 +46,8 @@ const HomeScreen = ({ route }) => {
         body: JSON.stringify({
           userId,
           description,
-          userPicturePath: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
-          picturePath: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
+          userPicturePath: picture,
+          picturePath: picture,
         }),
       });
       const result = await response.json();
@@ -136,6 +139,20 @@ const HomeScreen = ({ route }) => {
     }
   };
 
+  const handleImage = async () => {
+    let selected = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    console.log(selected);
+ 
+    if (!selected.canceled) {
+      setPicture(selected.assets[0].uri);
+    }
+  };
+
   useEffect(() => {
     fetchPosts();
   }, []);
@@ -149,6 +166,13 @@ const HomeScreen = ({ route }) => {
           value={description}
           onChangeText={setDescription}
         />
+        <Button
+        mode="contained"
+        onPress={handleImage}
+        style={styles.imageButton}
+      >
+        Select Image
+      </Button>
         <Button mode="contained" onPress={handlePost} style={styles.postButton}>
           Post
         </Button>
