@@ -11,6 +11,11 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "plugins": [
+      "expo-image-picker",{
+        "photos-permission": "Allow app to access gallery"
+      }
+    ],
     "assetBundlePatterns": [
       "**/*"
     ],

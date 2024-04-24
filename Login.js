@@ -19,18 +19,20 @@ export default function LoginScreen({ navigation }) {
           password,
         }),
       });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
       const data = await response.json();
       console.log(data); // You can handle success accordingly
       navigation.navigate('Home', { token: data.token, userId: data.user._id, firstName: data.user.firstName , lastName: data.user.lastName }); // Pass userId along with token
     } catch (error) {
       console.error('Login failed:', error.message); // Log the error message
-      if (error.response) {
-        console.error('Error response:', error.response.data); // Log the response data if available
+      if (error instanceof SyntaxError) {
+        console.error('Invalid JSON format in response:', await response.text());
       }
       // Handle other errors accordingly
     }
-  };
-
+  }    
   return (
     <View style={styles.container}>
       <Text>Login</Text>

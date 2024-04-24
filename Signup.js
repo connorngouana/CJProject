@@ -25,17 +25,23 @@ export default function SignupScreen() {
           password,
         }),
       });
+      if (!response.ok) {
+        throw new Error('Signup failed');
+      }
       const data = await response.json();
       console.log(data); // You can handle success accordingly
-      if (response.ok) {
-        navigation.navigate('Login');
-      } else {
-        console.error('Signup failed:', data.error);
-      }
+      // Clear input fields
+      setFirstName('');
+      setLastName('');
+      setEmail('');
+      setPassword('');
+      navigation.navigate('Login');
     } catch (error) {
-      console.error('Signup failed:', error); // You can handle errors accordingly
+      console.error('Signup failed:', error.message);
+      // Handle errors accordingly
     }
   };
+  
 
   return (
     <View style={styles.container}>
